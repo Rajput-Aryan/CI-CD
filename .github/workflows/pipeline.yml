@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Pipeline
 
 on:
   push:
@@ -7,10 +7,25 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t personal-profile:ci .
+      - name: HTML validation
+        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+        with:
+          root: ./personal-profile
+
+      - name: Check for broken links
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --no-progress './personal-profile/**/*.html'
+
+  deploy:
+    needs: checks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel deploy
+        run: curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
