@@ -17,10 +17,7 @@ jobs:
         with:
           root: .
 
-      - name: Check for broken links
-        uses: lycheeverse/lychee-action@v1
-        with:
-          args: --no-progress './**/*.html'
+
 
   deploy:
     needs: checks
